@@ -14,7 +14,6 @@
             100% { background-color: #050a0f; }
         }
 
-        /* বাটনের জন্য কালার অ্যানিমেশন */
         @keyframes btnGlow {
             0% { filter: hue-rotate(0deg); }
             100% { filter: hue-rotate(360deg); }
@@ -83,16 +82,11 @@
             animation: btnGlow 7s infinite linear;
         }
 
-        .info-section { margin-top: 25px; border-top: 1px solid #30363d; padding-top: 20px; }
-        .info-title { color: #58a6ff; font-size: 16px; font-weight: bold; margin-bottom: 10px; display: block; }
-
-        /* সোশ্যাল সেকশন আপডেট */
         .social-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #30363d; text-align: center; }
         .social-item { margin-bottom: 40px; display: block; text-decoration: none; }
         .social-logo {
             width: 150px; height: 150px;
             margin-bottom: 12px;
-            transition: transform 0.2s;
         }
         .social-text { display: block; font-size: 15px; color: #ffffff; font-weight: bold; line-height: 1.4; }
 
@@ -115,28 +109,21 @@
         <a id="earningBtn" class="btn" href="#" target="_blank">GET VIP KEY NOW</a>
         
         <a href="https://t.me/+BX8lzcqIxdxlNjA1" class="btn tg-btn" target="_blank">
-            যারা নতুন আছেন তারা এই লিংকে গিয়া টেলিগ্রাম চ্যানেলে জয়েন হন প্যানেল নেওয়ার জন্য
+            টেলিগ্রাম চ্যানেলে জয়েন হন প্যানেল নেওয়ার জন্য
         </a>
-
-        <div class="info-section">
-            <span class="info-title">How It Works</span>
-            <p style="font-size:12px; color:#c9d1d9;">Complete the earning link to access the key generator.</p>
-        </div>
 
         <div class="social-section">
             <a href="https://t.me/+BX8lzcqIxdxlNjA1" class="social-item" target="_blank">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" class="social-logo" alt="Telegram">
-                <span class="social-text">প্যানেল নিতে হলে এই লোগোর উপরে ক্লিক করুন</span>
+                <span class="social-text">প্যানেল নিতে এখানে ক্লিক করুন</span>
             </a>
-
             <a href="https://chat.whatsapp.com/GGuydDXphFHAgJSCv97KEX" class="social-item" target="_blank">
                 <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="social-logo" alt="WhatsApp">
-                <span class="social-text">অফিশিয়াল চ্যানেল লিংক</span>
+                <span class="social-text">অফিশিয়াল হোয়াটসঅ্যাপ</span>
             </a>
-
             <a href="https://www.tiktok.com/@adfreefire999" class="social-item" target="_blank">
                 <img src="https://p16-va.lemon8cdn.com/obj/eden-va2/uhp_v_shpw_v_uhp/tiktok_logo_new.png" class="social-logo" alt="TikTok">
-                <span class="social-text">অফিশিয়াল চ্যানেল লিংক</span>
+                <span class="social-text">অফিশিয়াল টিকটক</span>
             </a>
         </div>
     </div>
@@ -149,11 +136,14 @@
         <div id="keyDisplay">VERIFIED ACCESS</div>
         <button id="genBtn" class="btn" onclick="generateKey()">VERIFY NEW KEY</button>
         <button id="copyBtn" class="btn" style="display:none; background:#1f6feb;" onclick="copyKey()">COPY KEY</button>
+        <p style="font-size:11px; color:#ff4d4d; text-align:center; margin-top:15px; font-weight:bold;">
+            সাবধান: একবার পাসওয়ার্ড বের করলে পুনরায় পেতে আবার আর্নিং লিংক পার হয়ে আসতে হবে। ব্যাক বাটন কাজ করবে না।
+        </p>
     </div>
 
 <script>
-    const EARNING_LINK = "https://linksgo.in/dMaMFJ8";
-    const REQUIRED_DOMAIN = "linksgo.in";
+    const EARNING_LINK = "https://adsfly.in/BCuf";
+    const REQUIRED_DOMAIN = "adsfly.in";
     const AIRTABLE_TOKEN = "patn7xmqXpUwZql5B.0c757efdff357a4cf8eee80f5e2e28a0ad16e2e84e6d6493ab62a6da54131eae";
     const BASE_ID = "appbcvyIYXVAZzmom";
     const TABLE_ID = "tbl1pjDWPEnDOeym5";
@@ -164,16 +154,28 @@
     }
     setInterval(updateClock, 1000);
 
+    // ব্যাক বাটন ব্লক এবং নতুন সিকিউরিটি চেক
     window.onload = function() {
         document.getElementById('earningBtn').href = EARNING_LINK;
+        
         const isFromEarning = document.referrer.includes(REQUIRED_DOMAIN);
-        const alreadyClaimed = sessionStorage.getItem('key_generated');
+        const isVerified = sessionStorage.getItem('token_valid');
 
-        if (isFromEarning && alreadyClaimed !== 'true') {
+        // যদি আর্নিং লিংক থেকে আসে এবং আগে থেকে ভেরিফাই করা না থাকে
+        if (isFromEarning && isVerified !== 'used') {
             document.getElementById('generatorPage').style.display = 'block';
+            document.getElementById('landingPage').style.display = 'none';
         } else {
+            // অন্য সব ক্ষেত্রে ল্যান্ডিং পেজে পাঠাবে
             document.getElementById('landingPage').style.display = 'block';
-            sessionStorage.removeItem('key_generated'); 
+            document.getElementById('generatorPage').style.display = 'none';
+        }
+    };
+
+    // ব্যাক বাটন প্রেস করলে বা ব্যাক করার চেষ্টা করলে এটি কাজ করবে
+    window.onpageshow = function(event) {
+        if (event.persisted) {
+            window.location.reload(); 
         }
     };
 
@@ -193,14 +195,19 @@
                 document.getElementById('keyDisplay').innerText = newKey;
                 genBtn.style.display = 'none';
                 document.getElementById('copyBtn').style.display = 'block';
-                sessionStorage.setItem('key_generated', 'true');
+                
+                // পাসওয়ার্ড বের হওয়ার সাথে সাথে সেশন টোকেন 'used' করে দেওয়া হলো
+                // এখন ব্যাক করলে বা পুনরায় আর্নিং লিংকের মাঝখান থেকে আসার চেষ্টা করলে সিস্টেম তাকে আর এলাও করবে না।
+                sessionStorage.setItem('token_valid', 'used');
             }
         } catch (e) { alert("Error!"); }
     }
 
     function copyKey() {
         navigator.clipboard.writeText(document.getElementById('keyDisplay').innerText);
-        alert("Key Copied!");
+        alert("Key Copied! Now visit link again for next key.");
+        // কপি করার পর পেজ রিলোড হয়ে যাবে যেন ইউজার আর এখানে থাকতে না পারে
+        window.location.href = window.location.pathname; 
     }
 </script>
 </body>
