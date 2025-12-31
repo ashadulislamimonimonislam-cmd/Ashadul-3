@@ -21,10 +21,10 @@
         .header-box { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
         .logo-img { width: 65px; height: 65px; border-radius: 12px; border: 1px solid #444; object-fit: cover; }
         .live-time-box { font-size: 12px; color: #f2cc60; margin-bottom: 10px; font-family: monospace; background: rgba(242, 204, 96, 0.1); padding: 5px 10px; border-radius: 5px; display: inline-block; }
-        .system-log { background: #010409; border-radius: 10px; padding: 15px; font-family: monospace; font-size: 11px; color: #d2a8ff; margin-top: 10px; line-height: 1.5; border: 1px solid #21262d; }
         .btn { background: #238636; color: #ffffff; border: none; padding: 14px; font-weight: bold; cursor: pointer; border-radius: 10px; width: 100%; margin-top: 20px; text-transform: uppercase; text-decoration: none; display: inline-block; text-align: center; animation: btnGlow 5s infinite linear; }
         #landingPage, #generatorPage { display: none; }
-        #keyDisplay { text-align: center; padding: 15px; font-size: 20px; color: #58a6ff; background: #161b22; border-radius: 10px; margin: 15px 0; border: 1px solid #30363d; }
+        #keyDisplay { text-align: center; padding: 15px; font-size: 20px; color: #58a6ff; background: #161b22; border-radius: 10px; margin: 15px 0; border: 1px solid #30363d; font-weight: bold; }
+        .warning { font-size: 11px; color: #ff4d4d; text-align: center; margin-top: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -35,8 +35,9 @@
             <h2>AD FREE FIRE</h2>
         </div>
         <div class="live-time-box">Time: <span class="live-clock"></span></div>
-        <div class="system-log">Click "GET VIP KEY" and complete steps.</div>
+        <div class="btn" style="background: #161b22; border: 1px solid #30363d; cursor: default;">STEPS: CLICK BELOW & COMPLETE</div>
         <a id="earningBtn" class="btn" href="#" target="_blank">GET VIP KEY NOW</a>
+        <a href="https://t.me/+BX8lzcqIxdxlNjA1" class="btn" style="background: #0088cc; font-size: 12px;">JOIN TELEGRAM</a>
     </div>
 
     <div id="generatorPage" class="container">
@@ -44,16 +45,17 @@
             <img src="https://i.supaimg.com/46dbfc30-50e2-42f9-8305-e5d132e1b867.jpg" class="logo-img">
             <h2>ACCESS GRANTED</h2>
         </div>
-        <div id="keyDisplay">VERIFIED</div>
-        <button id="genBtn" class="btn" onclick="generateKey()">SHOW PASSWORD</button>
-        <button id="copyBtn" class="btn" style="display:none; background:#1f6feb;" onclick="copyKey()">COPY PASSWORD</button>
+        <div id="keyDisplay">VERIFIED ACCESS</div>
+        <button id="genBtn" class="btn" onclick="generateKey()">GENERATE KEY</button>
+        <button id="copyBtn" class="btn" style="display:none; background:#1f6feb;" onclick="copyKey()">COPY KEY</button>
+        <p class="warning">সাবধান: একবার পাসওয়ার্ড বের করলে পুনরায় পেতে আবার লিংক পার হয়ে আসতে হবে।</p>
     </div>
 
 <script>
     const EARNING_LINK = "https://linksgo.in/3i6m";
     const REQUIRED_DOMAIN = "linksgo.in";
     
-    // Airtable Config
+    // Airtable Details
     const AIRTABLE_TOKEN = "patn7xmqXpUwZql5B.0c757efdff357a4cf8eee80f5e2e28a0ad16e2e84e6d6493ab62a6da54131eae";
     const BASE_ID = "appbcvyIYXVAZzmom";
     const TABLE_ID = "tbl1pjDWPEnDOeym5";
@@ -66,6 +68,8 @@
 
     window.onload = function() {
         document.getElementById('earningBtn').href = EARNING_LINK;
+        
+        // Security Check: Referral source verification
         const isFromEarning = document.referrer.includes(REQUIRED_DOMAIN);
         const isVerified = sessionStorage.getItem('token_valid');
 
@@ -78,12 +82,13 @@
 
     async function generateKey() {
         const genBtn = document.getElementById('genBtn');
-        genBtn.innerText = "Saving to Database...";
+        genBtn.innerText = "Syncing with Database...";
+        genBtn.disabled = true;
         
         const fixedKey = "123456789"; 
 
         try {
-            // সরাসরি Airtable API কল (CORS এরর এড়াতে mode: 'cors' এবং সঠিক হেডার ব্যবহার করা হয়েছে)
+            // Attempt to save to Airtable
             const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
                 method: 'POST',
                 headers: { 
@@ -93,30 +98,27 @@
                 body: JSON.stringify({ "fields": { "Password": fixedKey } })
             });
 
-            if (response.ok || response.status === 0) {
-                document.getElementById('keyDisplay').innerText = fixedKey;
-                genBtn.style.display = 'none';
-                document.getElementById('copyBtn').style.display = 'block';
-                sessionStorage.setItem('token_valid', 'used');
-            } else {
-                // যদি Airtable এ সমস্যা হয়, তাও পাসওয়ার্ড দেখাবে কিন্তু এলার্ট দিবে
-                alert("Database Sync Failed, but showing password.");
-                document.getElementById('keyDisplay').innerText = fixedKey;
-                genBtn.style.display = 'none';
-                document.getElementById('copyBtn').style.display = 'block';
-            }
+            // Success or Fail - show the password anyway to avoid user frustration
+            showPassword(fixedKey);
+
         } catch (e) { 
-            // নেটওয়ার্ক এরর হলেও পাসওয়ার্ড শো করার লজিক
-            document.getElementById('keyDisplay').innerText = fixedKey;
-            genBtn.style.display = 'none';
-            document.getElementById('copyBtn').style.display = 'block';
+            console.log("Database Sync Error, bypass triggered.");
+            showPassword(fixedKey);
         }
+    }
+
+    function showPassword(key) {
+        document.getElementById('keyDisplay').innerText = key;
+        document.getElementById('genBtn').style.display = 'none';
+        document.getElementById('copyBtn').style.display = 'block';
+        sessionStorage.setItem('token_valid', 'used');
     }
 
     function copyKey() {
         navigator.clipboard.writeText(document.getElementById('keyDisplay').innerText);
-        alert("Copied! পুনরায় পেতে আবার লিঙ্ক পার হয়ে আসতে হবে।");
-        window.location.reload(); 
+        alert("Key Copied! পুনরায় পেতে আবার লিংক পার হয়ে আসতে হবে।");
+        // Reload and go back to landing page after copy
+        window.location.href = window.location.pathname; 
     }
 </script>
 </body>
