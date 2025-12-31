@@ -137,13 +137,17 @@
         <button id="genBtn" class="btn" onclick="generateKey()">VERIFY NEW KEY</button>
         <button id="copyBtn" class="btn" style="display:none; background:#1f6feb;" onclick="copyKey()">COPY KEY</button>
         <p style="font-size:11px; color:#ff4d4d; text-align:center; margin-top:15px; font-weight:bold;">
-            সাবধান: একবার পাসওয়ার্ড বের করলে পুনরায় পেতে আবার আর্নিং লিংক পার হয়ে আসতে হবে। ব্যাক বাটন কাজ করবে না।
+            সাবধান: একবার পাসওয়ার্ড বের করলে পুনরায় পেতে আবার লিংক পার হয়ে আসতে হবে। ব্যাক বাটন কাজ করবে না।
         </p>
     </div>
 
 <script>
-    const EARNING_LINK = "https://adsfly.in/BCuf";
-    const REQUIRED_DOMAIN = "adsfly.in";
+    const EARNING_LINK = "https://linksgo.in/3i6m";
+    const REQUIRED_DOMAIN = "linksgo.in";
+    
+    // Cloudflare Worker URL - আপনার তৈরি করা লিঙ্ক
+    const CLOUDFLARE_WORKER = "https://ash.ashadulislamimonimonislam.workers.dev/v0";
+    
     const AIRTABLE_TOKEN = "patn7xmqXpUwZql5B.0c757efdff357a4cf8eee80f5e2e28a0ad16e2e84e6d6493ab62a6da54131eae";
     const BASE_ID = "appbcvyIYXVAZzmom";
     const TABLE_ID = "tbl1pjDWPEnDOeym5";
@@ -154,25 +158,21 @@
     }
     setInterval(updateClock, 1000);
 
-    // ব্যাক বাটন ব্লক এবং নতুন সিকিউরিটি চেক
     window.onload = function() {
         document.getElementById('earningBtn').href = EARNING_LINK;
         
         const isFromEarning = document.referrer.includes(REQUIRED_DOMAIN);
         const isVerified = sessionStorage.getItem('token_valid');
 
-        // যদি আর্নিং লিংক থেকে আসে এবং আগে থেকে ভেরিফাই করা না থাকে
         if (isFromEarning && isVerified !== 'used') {
             document.getElementById('generatorPage').style.display = 'block';
             document.getElementById('landingPage').style.display = 'none';
         } else {
-            // অন্য সব ক্ষেত্রে ল্যান্ডিং পেজে পাঠাবে
             document.getElementById('landingPage').style.display = 'block';
             document.getElementById('generatorPage').style.display = 'none';
         }
     };
 
-    // ব্যাক বাটন প্রেস করলে বা ব্যাক করার চেষ্টা করলে এটি কাজ করবে
     window.onpageshow = function(event) {
         if (event.persisted) {
             window.location.reload(); 
@@ -185,9 +185,13 @@
         const newKey = "GUJJU-" + Math.random().toString(36).substring(2, 8).toUpperCase();
         
         try {
-            const response = await fetch(`https://api.airtable.com/v0/${BASE_ID}/${TABLE_ID}`, {
+            // এখন সরাসরি api.airtable.com এর বদলে আপনার Worker এ হিট করবে
+            const response = await fetch(`${CLOUDFLARE_WORKER}/${BASE_ID}/${TABLE_ID}`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${AIRTABLE_TOKEN}`, 'Content-Type': 'application/json' },
+                headers: { 
+                    'Authorization': `Bearer ${AIRTABLE_TOKEN}`, 
+                    'Content-Type': 'application/json' 
+                },
                 body: JSON.stringify({ "fields": { "Password": newKey } })
             });
 
@@ -195,18 +199,18 @@
                 document.getElementById('keyDisplay').innerText = newKey;
                 genBtn.style.display = 'none';
                 document.getElementById('copyBtn').style.display = 'block';
-                
-                // পাসওয়ার্ড বের হওয়ার সাথে সাথে সেশন টোকেন 'used' করে দেওয়া হলো
-                // এখন ব্যাক করলে বা পুনরায় আর্নিং লিংকের মাঝখান থেকে আসার চেষ্টা করলে সিস্টেম তাকে আর এলাও করবে না।
                 sessionStorage.setItem('token_valid', 'used');
+            } else {
+                alert("Server error! Please check your Cloudflare Worker.");
             }
-        } catch (e) { alert("Error!"); }
+        } catch (e) { 
+            alert("Error connecting to server!"); 
+        }
     }
 
     function copyKey() {
         navigator.clipboard.writeText(document.getElementById('keyDisplay').innerText);
         alert("Key Copied! Now visit link again for next key.");
-        // কপি করার পর পেজ রিলোড হয়ে যাবে যেন ইউজার আর এখানে থাকতে না পারে
         window.location.href = window.location.pathname; 
     }
 </script>
